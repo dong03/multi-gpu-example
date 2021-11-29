@@ -3,16 +3,17 @@ sys.path.insert(0, '..')
 import os
 import re
 import argparse
+from apex import amp
+
 import torch
 import torch.nn as nn
-from tensorboardX import SummaryWriter
 from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
+from tensorboardX import SummaryWriter
 
 from model.resfcn import ResFCN
-from train.dataset import WholeDataset
-from train.schedulers import PolyLR
-from apex import amp
+from common.dataset import WholeDataset
+from common.schedulers import PolyLR
 from common.utils import Progbar
 
 
@@ -28,8 +29,10 @@ def parse():
 if __name__ == "__main__":
 
     opt = parse()
-    '''----------------------------------------------------------------'''
-    #local_rank = opt.local_rank
+    '''
+    initilize at the beginning
+    仅local_rank为0时执行print、log、save等操作
+    ----------------------------------------------------------------'''
     local_rank = int(os.environ['LOCAL_RANK'])
 
     torch.cuda.set_device(local_rank)
@@ -61,7 +64,11 @@ if __name__ == "__main__":
     board_num = 0
     start_epoch = 0
 
-    '''----------------------------------------------------------------'''
+    '''
+    设置多卡sampler以平分数据到各卡；
+    batchsize为每张卡的batch；
+    去掉shuffle
+    ----------------------------------------------------------------'''
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
     val_sampler = torch.utils.data.distributed.DistributedSampler(val_set)
 

@@ -3,22 +3,23 @@ sys.path.insert(0, '..')
 import os
 import re
 import argparse
+from apex import amp
+
 import torch
 import torch.nn as nn
-from tensorboardX import SummaryWriter
 from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
+from tensorboardX import SummaryWriter
 
 from model.resfcn import ResFCN
-from train.dataset import WholeDataset
-from train.schedulers import PolyLR
-from apex import amp
+from common.dataset import WholeDataset
+from common.schedulers import PolyLR
 from common.utils import Progbar
 
 
 def parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fp16', type=bool, default=True)
+    parser.add_argument('--fp16', type=int, default=1)
     parser.add_argument('--resume', type=str, default='None')
     parser.add_argument('--name', type=str, default='test')
     opt = parser.parse_args()
